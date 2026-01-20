@@ -1,8 +1,8 @@
 {
   "name": "mural-textos",
-  "homepage": "https://xtvback.github.io/mural-textos",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://xtvback.github.io/mural-textos",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
