@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { db } from "./firebase"
 import { collection, addDoc, onSnapshot, query, doc, deleteDoc, updateDoc } from "firebase/firestore"
-import { PlusCircle, Image as ImageIcon, Calendar, Search, Loader2, Trash2, Edit, Lock, Unlock } from "lucide-react"
+import { PlusCircle, Image as ImageIcon, Calendar, Search, Loader2, Trash2, Edit, Lock, Unlock, Volume2, VolumeX } from "lucide-react"
 
-// A tua senha secreta personalizada
 const PALAVRA_PASSE_MESTRE = "23872387" 
 
 function App() {
@@ -13,6 +12,9 @@ function App() {
   const [carregando, setCarregando] = useState(false)
   const [idSendoEditado, setIdSendoEditado] = useState(null)
   const [adminAtivo, setAdminAtivo] = useState(false)
+  const [aTocar, setATocar] = useState(false)
+  const audioRef = useRef(null)
+  
   const [novoTexto, setNovoTexto] = useState({ 
     titulo: "", conteudo: "", imagemUrl: "",
     dataManual: new Date().toISOString().split("T")[0] 
@@ -27,6 +29,15 @@ function App() {
     }, (error) => console.error(error))
     return unsubscribe
   }, [])
+
+  const toggleMusica = () => {
+    if (aTocar) {
+      audioRef.current.pause()
+    } else {
+      audioRef.current.play().catch(e => console.log("Erro ao tocar áudio:", e))
+    }
+    setATocar(!aTocar)
+  }
 
   const fazerLogin = () => {
     if (adminAtivo) {
@@ -45,18 +56,13 @@ function App() {
   const enviarTexto = async (e) => {
     e.preventDefault()
     if (!novoTexto.titulo.trim() || !novoTexto.conteudo.trim()) return
-
     setCarregando(true)
     try {
       if (idSendoEditado) {
-        const docRef = doc(db, "textos", idSendoEditado)
-        await updateDoc(docRef, { ...novoTexto })
+        await updateDoc(doc(db, "textos", idSendoEditado), { ...novoTexto })
         setIdSendoEditado(null)
       } else {
-        await addDoc(collection(db, "textos"), {
-          ...novoTexto,
-          criadoEm: new Date()
-        })
+        await addDoc(collection(db, "textos"), { ...novoTexto, criadoEm: new Date() })
       }
       setNovoTexto({ titulo: "", conteudo: "", imagemUrl: "", dataManual: new Date().toISOString().split("T")[0] })
       setMostrarForm(false)
@@ -68,22 +74,13 @@ function App() {
   }
 
   const apagarTexto = async (id) => {
-    if (window.confirm("Tens a certeza que queres eliminar este registo para sempre?")) {
-      try {
-        await deleteDoc(doc(db, "textos", id))
-      } catch (error) {
-        alert("Erro ao eliminar")
-      }
+    if (window.confirm("Tens a certeza que queres eliminar este registo?")) {
+      await deleteDoc(doc(db, "textos", id))
     }
   }
 
   const prepararEdicao = (t) => {
-    setNovoTexto({
-      titulo: t.titulo,
-      conteudo: t.conteudo,
-      imagemUrl: t.imagemUrl || "",
-      dataManual: t.dataManual
-    })
+    setNovoTexto({ titulo: t.titulo, conteudo: t.conteudo, imagemUrl: t.imagemUrl || "", dataManual: t.dataManual })
     setIdSendoEditado(t.id)
     setMostrarForm(true)
     window.scrollTo({ top: 0, behavior: "smooth" })
@@ -104,30 +101,41 @@ function App() {
 
   return (
     <div className="min-h-screen bg-[#f8f9fa] p-6 md:p-12 font-sans text-gray-900">
+      {/* Link direto para o ficheiro Ambiente.mp3 no GitHub */}
+      <audio 
+        ref={audioRef} 
+        src="https://raw.githubusercontent.com/Xtvback/minha-primeira-app/main/Ambiente.mp3" 
+        loop 
+      />
+
       <header className="max-w-6xl mx-auto mb-16">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
             <h1 className="text-5xl md:text-6xl font-serif italic text-gray-900 leading-tight">Onde o Silêncio não Chega</h1>
-            <p className="text-gray-500 mt-4 font-light tracking-wide">André M. Fernandes</p>
+            <div className="flex items-center gap-4 mt-4">
+              <p className="text-gray-500 font-light tracking-wide">André M. Fernandes</p>
+              <button 
+                onClick={toggleMusica}
+                className={`flex items-center gap-2 text-xs uppercase tracking-widest transition px-3 py-1 rounded-full border ${aTocar ? "bg-black text-white border-black" : "text-gray-400 border-gray-200 hover:text-black hover:border-black"}`}
+              >
+                {aTocar ? <Volume2 size={14} /> : <VolumeX size={14} />}
+                {aTocar ? "Pausar Som" : "Ouvir Arquivo"}
+              </button>
+            </div>
           </div>
           <div className="flex gap-4">
             <button 
               onClick={fazerLogin}
               className={`p-3 rounded-full transition shadow-sm ${adminAtivo ? "bg-green-100 text-green-700" : "bg-white text-gray-400 hover:text-gray-600"}`}
-              title={adminAtivo ? "Modo Editor Ativo" : "Login de Administrador"}
             >
               {adminAtivo ? <Unlock size={20} /> : <Lock size={20} />}
             </button>
             {adminAtivo && (
               <button 
-                onClick={() => {
-                  setMostrarForm(!mostrarForm)
-                  setIdSendoEditado(null)
-                  if (!mostrarForm) setNovoTexto({ titulo: "", conteudo: "", imagemUrl: "", dataManual: new Date().toISOString().split("T")[0] })
-                }} 
-                className="bg-black text-white px-8 py-3 rounded-full flex items-center gap-3 text-sm hover:bg-gray-800 transition shadow-lg"
+                onClick={() => { setMostrarForm(!mostrarForm); setIdSendoEditado(null); }} 
+                className="bg-black text-white px-8 py-3 rounded-full flex items-center gap-3 text-sm shadow-lg"
               >
-                <PlusCircle size={18} /> {mostrarForm ? "Cancelar" : "Criar Novo Registo"}
+                <PlusCircle size={18} /> {mostrarForm ? "Cancelar" : "Novo Registo"}
               </button>
             )}
           </div>
@@ -140,9 +148,9 @@ function App() {
 
       <main className="max-w-6xl mx-auto">
         {mostrarForm && adminAtivo && (
-          <form onSubmit={enviarTexto} className="mb-12 bg-white p-8 border border-gray-100 shadow-xl max-w-2xl mx-auto animate-in fade-in slide-in-from-top-4 duration-500">
+          <form onSubmit={enviarTexto} className="mb-12 bg-white p-8 border border-gray-100 shadow-xl max-w-2xl mx-auto animate-in fade-in duration-500">
             <h3 className="text-sm uppercase tracking-widest text-gray-400 mb-6">{idSendoEditado ? "A Editar Registo" : "Novo Registo"}</h3>
-            <input type="text" placeholder="Título..." className="w-full text-2xl font-serif mb-6 outline-none border-b border-gray-100 pb-2 focus:border-black transition" value={novoTexto.titulo} onChange={(e) => setNovoTexto({...novoTexto, titulo: e.target.value})} required />
+            <input type="text" placeholder="Título..." className="w-full text-2xl font-serif mb-6 outline-none border-b border-gray-100 pb-2 focus:border-black" value={novoTexto.titulo} onChange={(e) => setNovoTexto({...novoTexto, titulo: e.target.value})} required />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
               <input type="date" className="bg-gray-50 p-3 rounded text-sm text-gray-600 outline-none" value={novoTexto.dataManual} onChange={(e) => setNovoTexto({...novoTexto, dataManual: e.target.value})} required />
               <input type="text" placeholder="URL da imagem (opcional)" className="bg-gray-50 p-3 rounded text-sm text-gray-600 outline-none" value={novoTexto.imagemUrl} onChange={(e) => setNovoTexto({...novoTexto, imagemUrl: e.target.value})} />
@@ -159,12 +167,8 @@ function App() {
             <article key={t.id} className="bg-white border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-500 flex flex-col group relative">
               {adminAtivo && (
                 <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <button onClick={() => prepararEdicao(t)} className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-white text-gray-600">
-                    <Edit size={16} />
-                  </button>
-                  <button onClick={() => apagarTexto(t.id)} className="p-2 bg-white/90 rounded-full shadow-sm hover:bg-red-50 text-red-500">
-                    <Trash2 size={16} />
-                  </button>
+                  <button onClick={() => prepararEdicao(t)} className="p-2 bg-white/90 rounded-full text-gray-600 shadow-sm"><Edit size={16} /></button>
+                  <button onClick={() => apagarTexto(t.id)} className="p-2 bg-white/90 rounded-full text-red-500 shadow-sm"><Trash2 size={16} /></button>
                 </div>
               )}
               {t.imagemUrl && (
@@ -188,3 +192,4 @@ function App() {
 }
 
 export default App
+
