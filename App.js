@@ -12,17 +12,25 @@ import {
 } from "firebase/firestore"
 import { 
   getAuth, 
-  signInWithCustomToken, 
   signInAnonymously, 
   onAuthStateChanged 
 } from "firebase/auth"
 
-// Configuração do Firebase injetada pelo ambiente
-const firebaseConfig = JSON.parse(__firebase_config)
+// As tuas novas chaves do projeto "Onde o Silencio nao Chega"
+const firebaseConfig = {
+  apiKey: "AIzaSyDx8FnnjQL2Gio0OByhkmfwk5r_hGj39bc",
+  authDomain: "onde-o-silencio-nao-chega.firebaseapp.com",
+  projectId: "onde-o-silencio-nao-chega",
+  storageBucket: "onde-o-silencio-nao-chega.firebasestorage.app",
+  messagingSenderId: "100267491281",
+  appId: "1:100267491281:web:545eb0fbf2a2ba74262af0",
+  measurementId: "G-WVP02GEMRM"
+};
+
 const app = initializeApp(firebaseConfig)
 const auth = getAuth(app)
 const db = getFirestore(app)
-const appId = typeof __app_id !== "undefined" ? __app_id : "mural-xtvback"
+const appId = "mural-textos"
 
 export default function App() {
   const [user, setUser] = useState(null)
@@ -34,7 +42,6 @@ export default function App() {
   const [editId, setEditId] = useState(null)
   const [errorMessage, setErrorMessage] = useState("")
   
-  // Estados da Música
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioProgress, setAudioProgress] = useState(0)
   const audioRef = useRef(null)
@@ -44,15 +51,10 @@ export default function App() {
   const [newImageUrl, setNewImageUrl] = useState("")
   const [newDate, setNewDate] = useState(new Date().toISOString().split("T")[0])
 
-  // Regra 3: Autenticação antes de qualquer operação
   useEffect(() => {
     const initAuth = async () => {
       try {
-        if (typeof __initial_auth_token !== "undefined" && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token)
-        } else {
-          await signInAnonymously(auth)
-        }
+        await signInAnonymously(auth)
       } catch (error) {
         console.error("Erro na autenticação")
       }
@@ -62,11 +64,10 @@ export default function App() {
     return () => unsubscribe()
   }, [])
 
-  // Regra 1 e 2: Carregamento de dados com caminho estrito e ordenação em memória
   useEffect(() => {
     if (!user) return
 
-    const textsCollection = collection(db, "artifacts", appId, "public", "data", "texts")
+    const textsCollection = collection(db, "data", appId, "public")
     
     const unsubscribe = onSnapshot(
       textsCollection,
@@ -75,7 +76,6 @@ export default function App() {
           id: doc.id,
           ...doc.data()
         }))
-        // Ordenação manual para evitar necessidade de índices complexos no Firebase
         const sortedDocs = docs.sort((a, b) => new Date(b.date) - new Date(a.date))
         setTexts(sortedDocs)
         setLoading(false)
@@ -88,16 +88,13 @@ export default function App() {
     return () => unsubscribe()
   }, [user])
 
-  // Lógica do Áudio
   useEffect(() => {
     const audio = audioRef.current
     if (!audio) return
-
     const updateProgress = () => {
       const progress = (audio.currentTime / audio.duration) * 100
       setAudioProgress(progress)
     }
-
     audio.addEventListener("timeupdate", updateProgress)
     return () => audio.removeEventListener("timeupdate", updateProgress)
   }, [])
@@ -133,8 +130,6 @@ export default function App() {
 
   const handleSave = async (e) => {
     e.preventDefault()
-    
-    // Verificações básicas antes de tentar guardar
     if (!user) {
       setErrorMessage("Utilizador não autenticado. Por favor, aguarda um momento.")
       return
@@ -146,8 +141,6 @@ export default function App() {
 
     setIsSaving(true)
     setErrorMessage("")
-
-    // Normalização da data para evitar problemas de fuso horário no browser
     const finalDate = new Date(newDate + 'T12:00:00').toISOString()
     
     const entryData = {
@@ -159,10 +152,9 @@ export default function App() {
     }
 
     try {
-      const textsCollection = collection(db, "artifacts", appId, "public", "data", "texts")
-      
+      const textsCollection = collection(db, "data", appId, "public")
       if (editId) {
-        const textDoc = doc(db, "artifacts", appId, "public", "data", "texts", editId)
+        const textDoc = doc(db, "data", appId, "public", editId)
         await updateDoc(textDoc, entryData)
         if (selectedText && selectedText.id === editId) {
           setSelectedText({ id: editId, ...entryData })
@@ -170,16 +162,13 @@ export default function App() {
       } else {
         await addDoc(textsCollection, entryData)
       }
-
-      // Limpeza após sucesso
       setNewTitle("")
       setNewContent("")
       setNewImageUrl("")
       setEditId(null)
       setIsAdding(false)
     } catch (error) {
-      console.error("Erro ao guardar no Firebase:", error)
-      setErrorMessage("Ocorreu um erro ao guardar. Tenta novamente.")
+      setErrorMessage("Erro ao guardar. Verifica as regras do Firebase.")
     } finally {
       setIsSaving(false)
     }
@@ -188,9 +177,8 @@ export default function App() {
   const handleDelete = async (e, id) => {
     e.stopPropagation()
     if (!user) return
-
     try {
-      const textDoc = doc(db, "artifacts", appId, "public", "data", "texts", id)
+      const textDoc = doc(db, "data", appId, "public", id)
       await deleteDoc(textDoc)
       if (selectedText && selectedText.id === id) setSelectedText(null)
     } catch (error) {
@@ -223,7 +211,6 @@ export default function App() {
         loop 
       />
 
-      {/* Painel Lateral */}
       <aside className="w-full md:w-80 lg:w-96 bg-white border-r border-zinc-100 flex flex-col md:h-screen sticky top-0 z-40 overflow-y-auto">
         <div className="p-10 flex flex-col h-full">
           <div className="mb-12">
@@ -293,7 +280,6 @@ export default function App() {
         </div>
       </aside>
 
-      {/* Galeria */}
       <main className="flex-grow p-6 md:p-12 lg:p-20 overflow-x-hidden">
         <div className="max-w-5xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 md:gap-16">
@@ -346,7 +332,6 @@ export default function App() {
         </div>
       </main>
 
-      {/* Modal de Escrita */}
       {isAdding && (
         <div className="fixed inset-0 bg-zinc-900/40 backdrop-blur-md z-[100] flex items-center justify-end p-0 md:p-8 animate-in fade-in duration-500">
           <div className="w-full max-w-2xl bg-white h-full md:h-auto md:max-h-[90vh] md:rounded-[2.5rem] shadow-2xl flex flex-col animate-in slide-in-from-right duration-500">
@@ -443,7 +428,6 @@ export default function App() {
         </div>
       )}
 
-      {/* Leitura Imersiva */}
       {selectedText && (
         <div className="fixed inset-0 bg-white z-[80] overflow-y-auto animate-in slide-in-from-bottom-10 duration-700">
           <div className="max-w-4xl mx-auto px-8 py-20 md:py-32 relative">
