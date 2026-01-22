@@ -25,91 +25,91 @@ function App() {
   useEffect(() => {
     const q = query(collection(db, "textos"))
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const dados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
-      dados.sort((a, b) => b.dataManual.localeCompare(a.dataManual))
-      setTextos(dados)
-    }, (error) => console.error(error))
-    return unsubscribe
+      const dados = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      dados.sort((a, b) => b.dataManual.localeCompare(a.dataManual));
+      setTextos(dados);
+    }, (error) => console.error(error));
+    return unsubscribe;
   }, [])
 
   const toggleMusica = () => {
     if (aTocar) { audioRef.current.pause() } 
     else { audioRef.current.play().catch(e => console.log("Erro no som", e)) }
-    setATocar(!aTocar)
+    setATocar(!aTocar);
   }
 
   const fazerLogin = () => {
     if (adminAtivo) { setAdminAtivo(false); setMostrarForm(false); return }
-    const senha = prompt("Introduz a palavra passe para gerir o arquivo:")
+    const senha = prompt("Introduz a palavra passe para gerir o arquivo:");
     if (senha === PALAVRA_PASSE_MESTRE) { setAdminAtivo(true) } 
     else if (senha !== null) { alert("Palavra passe incorreta") }
   }
 
   const enviarTexto = async (e) => {
-    e.preventDefault()
-    if (!novoTexto.titulo.trim() || !novoTexto.conteudo.trim()) return
-    setCarregando(true)
+    e.preventDefault();
+    if (!novoTexto.titulo.trim() || !novoTexto.conteudo.trim()) return;
+    setCarregando(true);
     try {
       if (idSendoEditado) {
-        await updateDoc(doc(db, "textos", idSendoEditado), { ...novoTexto })
-        setIdSendoEditado(null)
+        await updateDoc(doc(db, "textos", idSendoEditado), { ...novoTexto });
+        setIdSendoEditado(null);
       } else {
-        await addDoc(collection(db, "textos"), { ...novoTexto, criadoEm: new Date() })
+        await addDoc(collection(db, "textos"), { ...novoTexto, criadoEm: new Date() });
       }
-      setNovoTexto({ titulo: "", conteudo: "", imagemUrl: "", dataManual: new Date().toISOString().split("T")[0] })
-      setMostrarForm(false)
+      setNovoTexto({ titulo: "", conteudo: "", imagemUrl: "", dataManual: new Date().toISOString().split("T")[0] });
+      setMostrarForm(false);
     } catch (error) { alert("Erro ao processar") } 
     finally { setCarregando(false) }
   }
 
   const apagarTexto = async (id) => {
     if (window.confirm("Queres eliminar este fragmento?")) {
-      await deleteDoc(doc(db, "textos", id))
+      await deleteDoc(doc(db, "textos", id));
     }
   }
 
   const obterEstatisticas = () => {
     return textos.reduce((acc, t) => {
-      const data = new Date(t.dataManual)
-      const ano = data.getFullYear()
-      const mes = data.getMonth()
-      if (!acc[ano]) acc[ano] = {}
-      if (!acc[ano][mes]) acc[ano][mes] = 0
-      acc[ano][mes]++
-      return acc
+      const data = new Date(t.dataManual);
+      const ano = data.getFullYear();
+      const mes = data.getMonth();
+      if (!acc[ano]) acc[ano] = {};
+      if (!acc[ano][mes]) acc[ano][mes] = 0;
+      acc[ano][mes]++;
+      return acc;
     }, {})
   }
 
-  const estatisticas = obterEstatisticas()
-  const anosOrdenados = Object.keys(estatisticas).sort((a, b) => b - a)
-  const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"]
+  const estatisticas = obterEstatisticas();
+  const anosOrdenados = Object.keys(estatisticas).sort((a, b) => b - a);
+  const nomesMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
   const textosFiltrados = textos.filter(t => {
-    const correspondePesquisa = t.titulo.toLowerCase().includes(filtro.toLowerCase()) || t.conteudo.toLowerCase().includes(filtro.toLowerCase())
-    if (!mesFiltro) return correspondePesquisa
-    const dataT = new Date(t.dataManual)
-    return correspondePesquisa && dataT.getFullYear() === mesFiltro.ano && dataT.getMonth() === mesFiltro.mes
+    const correspondePesquisa = t.titulo.toLowerCase().includes(filtro.toLowerCase()) || t.conteudo.toLowerCase().includes(filtro.toLowerCase());
+    if (!mesFiltro) return correspondePesquisa;
+    const dataT = new Date(t.dataManual);
+    return correspondePesquisa && dataT.getFullYear() === mesFiltro.ano && dataT.getMonth() === mesFiltro.mes;
   })
 
   const formatarDataExibicao = (dataString) => {
-    if (!dataString) return ""
-    const [ano, mes, dia] = dataString.split("-")
-    const data = new Date(ano, mes - 1, dia)
-    return data.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" })
+    if (!dataString) return "";
+    const [ano, mes, dia] = dataString.split("-");
+    const data = new Date(ano, mes - 1, dia);
+    return data.toLocaleDateString("pt-PT", { day: "2-digit", month: "long", year: "numeric" });
   }
 
   return (
     <div className="min-h-screen bg-[#fcfaf7] text-[#2d2a26] font-sans selection:bg-[#8c7851] selection:text-white transition-all duration-500">
       <audio ref={audioRef} src="https://raw.githubusercontent.com/Xtvback/minha-primeira-app/main/Ambiente.mp3" loop />
 
-      {/* Som Atmosférico */}
-      <div className="fixed bottom-8 left-8 z-[100] flex items-center gap-4 bg-white/60 backdrop-blur-md border border-[#2d2a26]/10 p-2 pr-6 rounded-full group hover:border-[#8c7851] transition-all cursor-pointer" onClick={toggleMusica}>
+      {/* Botão de Som Envolvente no Canto */}
+      <div className="fixed bottom-8 left-8 z-[100] flex items-center gap-4 bg-white/40 backdrop-blur-md border border-[#2d2a26]/10 p-2 pr-6 rounded-full group hover:border-[#8c7851] transition-all cursor-pointer" onClick={toggleMusica}>
         <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${aTocar ? "bg-[#8c7851] text-white" : "bg-[#2d2a26] text-white"}`}>
           {aTocar ? <Volume2 size={18} /> : <VolumeX size={18} />}
         </div>
         <div className="flex flex-col">
           <span className="text-[8px] uppercase tracking-[0.2em] font-bold text-gray-400 group-hover:text-[#8c7851]">Atmosfera</span>
-          <span className="text-[10px] uppercase tracking-[0.1em] font-medium">{aTocar ? "Ativa" : "Silêncio"}</span>
+          <span className="text-[10px] uppercase tracking-[0.1em] font-medium">{aTocar ? "Sinfonia Ativa" : "Ativar Som"}</span>
         </div>
       </div>
 
@@ -199,8 +199,9 @@ function App() {
                   </div>
                 )}
                 {t.imagemUrl && (
-                  <div className="mb-8 overflow-hidden bg-[#fcfaf7] border border-[#2d2a26]/5">
-                    <img src={t.imagemUrl} alt="" className="w-full h-auto transition-all duration-[1.2s] group-hover:scale-105" />
+                  // AQUI ESTÁ A MUDANÇA PRINCIPAL
+                  <div className="mb-8 border border-[#2d2a26]/5 bg-gray-50">
+                    <img src={t.imagemUrl} alt="" className="w-full h-auto transition-all duration-[1.2s]" />
                   </div>
                 )}
                 <div className="text-[9px] text-[#8c7851] uppercase tracking-[0.4em] mb-4 font-bold">{formatarDataExibicao(t.dataManual)}</div>
