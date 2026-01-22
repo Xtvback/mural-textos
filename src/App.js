@@ -68,7 +68,6 @@ function App() {
     }
   }
 
-  // Lógica da Cronologia
   const obterEstatisticas = () => {
     return textos.reduce((acc, t) => {
       const data = new Date(t.dataManual)
@@ -100,20 +99,21 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-[#fdfbf7] text-[#1a1a1a]">
+    <div className="min-h-screen bg-[#fdfbf7] text-[#1a1a1a] font-sans">
       <audio ref={audioRef} src="https://raw.githubusercontent.com/Xtvback/minha-primeira-app/main/Ambiente.mp3" loop />
 
-      <nav className="fixed top-0 w-full bg-white/60 backdrop-blur-xl z-50 border-b border-[#e5e0d8] px-6 py-4">
+      {/* Navegação Superior Discreta */}
+      <nav className="fixed top-0 w-full bg-white/40 backdrop-blur-sm z-50 border-b border-[#ece8e1] px-8 py-3">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <button onClick={toggleMusica} className={`flex items-center gap-3 text-[10px] uppercase tracking-[0.3em] font-medium transition-all ${aTocar ? "text-[#8c7851]" : "text-gray-400 hover:text-black"}`}>
-            {aTocar ? "Som Ativo" : "Silêncio"}
+          <button onClick={toggleMusica} className="flex items-center gap-3 text-[9px] uppercase tracking-[0.3em] font-semibold text-[#8c7851] hover:text-black transition-all">
+            {aTocar ? "Arquivo Sonoro Ativo" : "Ativar Som"}
           </button>
-          <div className="flex items-center gap-6">
-            <button onClick={fazerLogin} className={`p-2 transition-colors ${adminAtivo ? "text-[#8c7851]" : "text-gray-300 hover:text-gray-500"}`}>
-              {adminAtivo ? <Unlock size={18} /> : <Lock size={18} />}
+          <div className="flex items-center gap-5">
+            <button onClick={fazerLogin} className="text-gray-300 hover:text-gray-500 transition-colors">
+              {adminAtivo ? <Unlock size={16} /> : <Lock size={16} />}
             </button>
             {adminAtivo && (
-              <button onClick={() => { setMostrarForm(!mostrarForm); setIdSendoEditado(null); }} className="border border-black text-black px-6 py-2 rounded-full text-[10px] uppercase tracking-widest hover:bg-black hover:text-white transition-all">
+              <button onClick={() => { setMostrarForm(!mostrarForm); setIdSendoEditado(null); }} className="text-[9px] uppercase tracking-widest font-bold border-b border-black pb-1">
                 Nova Memória
               </button>
             )}
@@ -121,123 +121,130 @@ function App() {
         </div>
       </nav>
 
-      <header className="pt-40 pb-20 px-6 max-w-7xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Feather size={20} className="text-[#8c7851]" />
-          <span className="text-[10px] uppercase tracking-[0.5em] text-[#8c7851] font-bold">Arquivo Literário</span>
+      {/* Título Refinado e Menos Dominante */}
+      <header className="pt-32 pb-16 px-8 max-w-7xl mx-auto text-center md:text-left">
+        <div className="flex items-center justify-center md:justify-start gap-3 mb-6">
+          <Feather size={16} className="text-[#8c7851]" />
+          <span className="text-[9px] uppercase tracking-[0.4em] text-[#8c7851] font-bold">Arquivo Pessoal</span>
         </div>
-        <h1 className="text-7xl md:text-9xl font-serif italic mb-8 tracking-tighter leading-[0.85]">Onde o Silêncio<br/>não Chega</h1>
-        <p className="text-xl md:text-2xl font-serif italic text-gray-400 max-w-xl">Memórias e fragmentos de André M. Fernandes.</p>
+        <h1 className="text-4xl md:text-6xl font-serif italic mb-6 tracking-tight leading-tight">
+          Onde o Silêncio não Chega
+        </h1>
+        <p className="text-lg font-serif italic text-gray-400 max-w-lg leading-relaxed">
+          Fragmentos e memórias registadas por André M. Fernandes.
+        </p>
       </header>
 
-      <div className="max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-12 gap-16 pb-24">
+      <div className="max-w-7xl mx-auto px-8 grid grid-cols-1 lg:grid-cols-12 gap-12 pb-24">
         
-        {/* Menu Lateral de Cronologia */}
-        <aside className="lg:col-span-3 space-y-12">
-          <div className="sticky top-32">
-            <div className="flex items-center gap-2 mb-8 text-[10px] uppercase tracking-[0.2em] font-bold text-gray-400">
-              <Clock size={14} /> Cronologia do Arquivo
-            </div>
-            
-            <div className="space-y-8">
+        {/* Cronologia Lateral com Estética Minimalista */}
+        <aside className="lg:col-span-3">
+          <div className="lg:sticky lg:top-32 space-y-10">
+            <div className="space-y-6">
+              <h3 className="text-[10px] uppercase tracking-[0.3em] font-bold text-gray-300 flex items-center gap-2">
+                <Clock size={12} /> Navegação Temporal
+              </h3>
               {anosOrdenados.map(ano => (
-                <div key={ano}>
-                  <h3 className="font-serif italic text-xl mb-4 border-b border-[#e5e0d8] pb-2">{ano}</h3>
-                  <ul className="space-y-3">
+                <div key={ano} className="space-y-3">
+                  <div className="text-sm font-serif italic text-gray-900 border-b border-[#ece8e1] pb-1 w-full flex justify-between">
+                    {ano} <span className="text-[9px] text-gray-300 not-italic">({Object.values(estatisticas[ano]).reduce((a, b) => a + b, 0)})</span>
+                  </div>
+                  <ul className="grid grid-cols-2 lg:grid-cols-1 gap-2">
                     {Object.keys(estatisticas[ano]).sort((a,b) => b-a).map(mes => (
                       <li key={mes}>
                         <button 
                           onClick={() => setMesFiltro(mesFiltro?.mes === parseInt(mes) && mesFiltro?.ano === parseInt(ano) ? null : { mes: parseInt(mes), ano: parseInt(ano) })}
-                          className={`flex justify-between w-full text-xs uppercase tracking-widest transition-colors ${mesFiltro?.mes === parseInt(mes) && mesFiltro?.ano === parseInt(ano) ? "text-[#8c7851] font-bold" : "text-gray-400 hover:text-black"}`}
+                          className={`text-[10px] uppercase tracking-widest transition-all ${mesFiltro?.mes === parseInt(mes) && mesFiltro?.ano === parseInt(ano) ? "text-[#8c7851] font-bold pl-2 border-l border-[#8c7851]" : "text-gray-400 hover:text-black hover:pl-1"}`}
                         >
-                          <span>{nomesMeses[mes]}</span>
-                          <span className="opacity-50">({estatisticas[ano][mes]})</span>
+                          {nomesMeses[mes]} <span className="opacity-40 text-[8px]">[{estatisticas[ano][mes]}]</span>
                         </button>
                       </li>
                     ))}
                   </ul>
                 </div>
               ))}
-              {mesFiltro && (
-                <button onClick={() => setMesFiltro(null)} className="text-[9px] uppercase tracking-widest text-red-400 mt-4 border-b border-red-100 pb-1">Limpar Filtro</button>
-              )}
             </div>
 
-            <div className="mt-16 pt-8 border-t border-[#e5e0d8]">
+            <div className="pt-6 border-t border-[#ece8e1]">
               <div className="relative">
-                <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" size={14} />
-                <input type="text" placeholder="Pesquisar..." className="w-full bg-transparent border-none pl-6 text-sm outline-none italic font-serif" value={filtro} onChange={(e) => setFiltro(e.target.value)} />
+                <Search className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300" size={12} />
+                <input type="text" placeholder="Pesquisar..." className="w-full bg-transparent border-none pl-5 text-xs outline-none italic font-serif placeholder:text-gray-200" value={filtro} onChange={(e) => setFiltro(e.target.value)} />
               </div>
             </div>
           </div>
         </aside>
 
-        {/* Mural Principal */}
+        {/* Mural de Cartões com Proporções Melhoradas */}
         <main className="lg:col-span-9">
-          <div className="columns-1 md:columns-2 gap-12 space-y-12">
+          <div className="columns-1 md:columns-2 gap-8 space-y-8">
             {textosFiltrados.map((t) => (
-              <article key={t.id} className="break-inside-avoid bg-white border border-[#f0eee9] p-8 hover:shadow-[0_20px_50px_rgba(140,120,81,0.05)] transition-all duration-700 group relative">
+              <article key={t.id} className="break-inside-avoid bg-white border border-[#f0eee9] p-6 hover:border-[#8c7851]/20 transition-all duration-500 group relative">
                 {adminAtivo && (
-                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                    <button onClick={() => prepararEdicao(t)} className="p-2 bg-white rounded-full border border-gray-100 text-gray-400 hover:text-black"><Edit size={12} /></button>
-                    <button onClick={() => apagarTexto(t.id)} className="p-2 bg-white rounded-full border border-gray-100 text-red-200 hover:text-red-500"><Trash2 size={12} /></button>
+                  <div className="absolute top-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                    <button onClick={() => { setIdSendoEditado(t.id); setNovoTexto({titulo: t.titulo, conteudo: t.conteudo, imagemUrl: t.imagemUrl || "", dataManual: t.dataManual}); setMostrarForm(true); }} className="text-gray-300 hover:text-black"><Edit size={12} /></button>
+                    <button onClick={() => apagarTexto(t.id)} className="text-red-100 hover:text-red-500"><Trash2 size={12} /></button>
                   </div>
                 )}
                 {t.imagemUrl && (
-                  <div className="mb-6 overflow-hidden">
-                    <img src={t.imagemUrl} alt="" className="w-full h-auto grayscale group-hover:grayscale-0 transition-all duration-1000" />
+                  <div className="mb-5 overflow-hidden">
+                    <img src={t.imagemUrl} alt="" className="w-full h-auto grayscale transition-all duration-700" />
                   </div>
                 )}
-                <div className="text-[9px] text-[#8c7851] uppercase tracking-[0.3em] mb-4">{formatarDataExibicao(t.dataManual)}</div>
-                <h2 className="text-2xl font-serif italic text-gray-900 mb-6 leading-tight">{t.titulo}</h2>
-                <button onClick={() => setTextoAberto(t)} className="flex items-center gap-2 text-[10px] uppercase tracking-widest font-bold text-gray-300 hover:text-black transition-colors">
-                  Ler Fragmento <ArrowRight size={14} />
+                <div className="text-[8px] text-[#8c7851] uppercase tracking-[0.2em] mb-3">{formatarDataExibicao(t.dataManual)}</div>
+                <h2 className="text-xl font-serif italic text-gray-900 mb-5 leading-snug group-hover:text-[#8c7851] transition-colors">{t.titulo}</h2>
+                <button onClick={() => setTextoAberto(t)} className="text-[9px] uppercase tracking-widest font-bold text-gray-300 group-hover:text-black flex items-center gap-2">
+                  Ler Fragmento <ArrowRight size={12} />
                 </button>
               </article>
             ))}
           </div>
-
-          {textosFiltrados.length === 0 && (
-            <div className="text-center py-32 border border-dashed border-[#e5e0d8]">
-              <p className="text-gray-300 font-serif italic text-xl">O silêncio permanece neste período...</p>
-            </div>
-          )}
         </main>
       </div>
 
-      {/* Janela de Leitura */}
+      {/* Janela de Leitura Focada - Tamanho sentido e equilibrado */}
       {textoAberto && (
-        <div className="fixed inset-0 bg-[#fdfbf7] z-[100] overflow-y-auto animate-in fade-in duration-500">
-          <nav className="sticky top-0 w-full bg-[#fdfbf7]/80 backdrop-blur-md border-b border-[#e5e0d8] px-6 py-6 z-10">
-            <div className="max-w-4xl mx-auto flex justify-between items-center">
-              <span className="text-[10px] uppercase tracking-[0.3em] text-[#8c7851] font-bold">A ler fragmento</span>
-              <button onClick={() => setTextoAberto(null)} className="flex items-center gap-2 text-[10px] uppercase tracking-widest hover:text-[#8c7851] transition-colors">Fechar <X size={16} /></button>
-            </div>
-          </nav>
-          <article className="max-w-3xl mx-auto py-24 px-6">
-            <header className="mb-16 text-center">
-              <div className="text-[10px] text-[#8c7851] uppercase tracking-[0.4em] mb-6">{formatarDataExibicao(textoAberto.dataManual)}</div>
-              <h1 className="text-5xl md:text-7xl font-serif italic mb-12 leading-tight">{textoAberto.titulo}</h1>
-              {textoAberto.imagemUrl && <img src={textoAberto.imagemUrl} alt="" className="w-full h-auto grayscale mb-16 shadow-2xl" />}
+        <div className="fixed inset-0 bg-[#fdfbf7]/98 z-[100] flex justify-center items-start overflow-y-auto p-4 md:p-12 animate-in fade-in duration-300">
+          <div className="max-w-2xl w-full bg-white border border-[#ece8e1] shadow-2xl my-auto relative p-8 md:p-16">
+            <button onClick={() => setTextoAberto(null)} className="absolute top-6 right-6 text-gray-300 hover:text-black transition-colors">
+              <X size={20} />
+            </button>
+            <header className="mb-12 text-center">
+              <div className="text-[9px] text-[#8c7851] uppercase tracking-[0.3em] mb-6 font-bold">{formatarDataExibicao(textoAberto.dataManual)}</div>
+              <h1 className="text-3xl md:text-5xl font-serif italic mb-10 leading-tight text-gray-900">{textoAberto.titulo}</h1>
+              {textoAberto.imagemUrl && (
+                <div className="w-full mb-10">
+                  <img src={textoAberto.imagemUrl} alt="" className="w-full h-auto grayscale shadow-lg" />
+                </div>
+              )}
             </header>
-            <p className="text-gray-700 font-serif italic text-xl md:text-2xl leading-[2] whitespace-pre-wrap">{textoAberto.conteudo}</p>
-          </article>
+            <div className="prose prose-sm mx-auto">
+              <p className="text-gray-700 font-serif italic text-lg leading-relaxed whitespace-pre-wrap">
+                {textoAberto.conteudo}
+              </p>
+            </div>
+            <footer className="mt-16 pt-8 border-t border-[#fcfaf7] text-center">
+              <Feather className="mx-auto text-[#8c7851]/30 mb-4" size={20} />
+              <p className="text-[8px] uppercase tracking-[0.4em] text-gray-300 font-bold">André M. Fernandes</p>
+            </footer>
+          </div>
         </div>
       )}
 
-      {/* Formulário Admin */}
+      {/* Formulário Admin Flutuante */}
       {mostrarForm && adminAtivo && (
-        <div className="fixed inset-0 bg-[#fdfbf7]/95 backdrop-blur-md z-[110] flex items-center justify-center p-6">
-          <form onSubmit={enviarTexto} className="bg-white border border-[#e5e0d8] p-12 shadow-2xl max-w-2xl w-full relative">
-            <button onClick={() => setMostrarForm(false)} className="absolute top-8 right-8 text-gray-300 hover:text-black">✕</button>
-            <h3 className="font-serif italic text-3xl mb-10">Registar Memória</h3>
-            <input type="text" placeholder="Título" className="w-full text-2xl font-serif mb-8 border-b border-[#f0eee9] pb-4 outline-none focus:border-[#8c7851]" value={novoTexto.titulo} onChange={(e) => setNovoTexto({...novoTexto, titulo: e.target.value})} required />
-            <div className="grid grid-cols-2 gap-8 mb-8">
-              <input type="date" className="bg-[#fdfbf7] p-4 text-xs outline-none" value={novoTexto.dataManual} onChange={(e) => setNovoTexto({...novoTexto, dataManual: e.target.value})} required />
-              <input type="text" placeholder="URL Imagem" className="bg-[#fdfbf7] p-4 text-xs outline-none" value={novoTexto.imagemUrl} onChange={(e) => setNovoTexto({...novoTexto, imagemUrl: e.target.value})} />
+        <div className="fixed inset-0 bg-black/5 backdrop-blur-sm z-[110] flex items-center justify-center p-4">
+          <form onSubmit={enviarTexto} className="bg-white border border-[#ece8e1] p-10 shadow-2xl max-w-xl w-full relative animate-in zoom-in duration-300">
+            <button onClick={() => setMostrarForm(false)} className="absolute top-6 right-6 text-gray-300 hover:text-black">✕</button>
+            <h3 className="font-serif italic text-2xl mb-8 border-b pb-4">Nova Memória</h3>
+            <input type="text" placeholder="Título" className="w-full text-lg font-serif mb-6 border-b border-[#f0eee9] pb-2 outline-none focus:border-[#8c7851] transition-all" value={novoTexto.titulo} onChange={(e) => setNovoTexto({...novoTexto, titulo: e.target.value})} required />
+            <div className="grid grid-cols-2 gap-6 mb-6">
+              <input type="date" className="bg-[#fdfbf7] p-3 text-[10px] outline-none border border-transparent focus:border-[#ece8e1]" value={novoTexto.dataManual} onChange={(e) => setNovoTexto({...novoTexto, dataManual: e.target.value})} required />
+              <input type="text" placeholder="URL da Imagem" className="bg-[#fdfbf7] p-3 text-[10px] outline-none border border-transparent focus:border-[#ece8e1]" value={novoTexto.imagemUrl} onChange={(e) => setNovoTexto({...novoTexto, imagemUrl: e.target.value})} />
             </div>
-            <textarea placeholder="Escrever..." className="w-full h-64 border-t border-[#f0eee9] pt-6 outline-none italic text-lg resize-none" value={novoTexto.conteudo} onChange={(e) => setNovoTexto({...novoTexto, conteudo: e.target.value})} required />
-            <button type="submit" className="w-full bg-black text-white py-5 uppercase tracking-[0.3em] text-[10px] font-bold hover:bg-[#8c7851] transition-all">Lançar ao Mural</button>
+            <textarea placeholder="Escrever fragmento..." className="w-full h-56 border-t border-[#f0eee9] pt-4 outline-none italic text-base resize-none leading-relaxed" value={novoTexto.conteudo} onChange={(e) => setNovoTexto({...novoTexto, conteudo: e.target.value})} required />
+            <button type="submit" className="w-full bg-black text-white py-4 uppercase tracking-[0.2em] text-[9px] font-bold hover:bg-[#8c7851] transition-all">
+              {carregando ? "A processar..." : "Lançar ao Mural"}
+            </button>
           </form>
         </div>
       )}
