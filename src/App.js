@@ -192,7 +192,7 @@ function App() {
           </div>
         </aside>
 
-        {/* Mural de Fragmentos Estilo Galeria */}
+        {/* Mural de Fragmentos Estilo Galeria - IMAGENS A CORES */}
         <main className="lg:col-span-9">
           <div className="columns-1 md:columns-2 gap-10 space-y-10">
             {textosFiltrados.map((t) => (
@@ -205,7 +205,8 @@ function App() {
                 )}
                 {t.imagemUrl && (
                   <div className="mb-8 overflow-hidden bg-[#fcfaf7] border border-[#2d2a26]/5">
-                    <img src={t.imagemUrl} alt="" className="w-full h-auto grayscale transition-all duration-[1.2s] group-hover:grayscale-0 group-hover:scale-105" />
+                    {/* REMOVIDO O GRAYSCALE DAQUI */}
+                    <img src={t.imagemUrl} alt="" className="w-full h-auto transition-all duration-[1.2s] group-hover:scale-105" />
                   </div>
                 )}
                 <div className="text-[9px] text-[#8c7851] uppercase tracking-[0.4em] mb-4 font-bold">{formatarDataExibicao(t.dataManual)}</div>
@@ -219,7 +220,7 @@ function App() {
         </main>
       </div>
 
-      {/* Leitura Focada Estilo Página de Livro */}
+      {/* Leitura Focada Estilo Página de Livro - IMAGEM A CORES */}
       {textoAberto && (
         <div className="fixed inset-0 bg-[#fcfaf7]/98 z-[110] flex justify-center items-center overflow-y-auto p-6 md:p-20 animate-in fade-in duration-500">
           <div className="max-w-2xl w-full bg-white border border-[#2d2a26]/10 p-10 md:p-20 relative shadow-2xl">
@@ -229,7 +230,8 @@ function App() {
             <header className="mb-16">
               <div className="text-[10px] text-[#8c7851] uppercase tracking-[0.5em] mb-8 font-bold text-center">{formatarDataExibicao(textoAberto.dataManual)}</div>
               <h1 className="text-4xl md:text-5xl font-serif italic mb-12 text-center leading-tight tracking-tight">{textoAberto.titulo}</h1>
-              {textoAberto.imagemUrl && <img src={textoAberto.imagemUrl} alt="" className="w-full h-auto grayscale mb-12 shadow-sm border border-[#2d2a26]/5" />}
+              {/* REMOVIDO O GRAYSCALE DAQUI TAMBÉM */}
+              {textoAberto.imagemUrl && <img src={textoAberto.imagemUrl} alt="" className="w-full h-auto mb-12 shadow-sm border border-[#2d2a26]/5" />}
             </header>
             <p className="text-[#4a4540] font-serif italic text-xl md:text-2xl leading-[1.8] whitespace-pre-wrap max-w-xl mx-auto">
               {textoAberto.conteudo}
